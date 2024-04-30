@@ -19,10 +19,10 @@ int main()
     SC_image.ComputeAllVerticalSeams();
     SC_image.OpenImage("seams");
     milliSleep(2000);
-    for (int i = 0; i < 3600; ++i) {
+    for (int i = 0; i < 7200; ++i) {
         noRefreshBegin();
         clearWindow();
-        SC_image.OpenImage("size", std::to_string(360 - (i % 360)));
+        SC_image.OpenImage("size", std::to_string(720 - (i % 720)));
         noRefreshEnd();
         milliSleep(10);
     }
