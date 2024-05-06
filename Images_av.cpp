@@ -22,6 +22,8 @@ void Images_av::LoadImage(string path)
 
         // Create an extended version of seams index and image
         vertseams_extended = Indimg(vert_seams.width() * 2, vert_seams.height());
+        vertseams_extended_heat_colored = Img(vert_seams_heat_colored.width() * 2,
+                                              vert_seams_heat_colored.height());
         loaded_image_extended = Img(loaded_image.width() * 2, loaded_image.height());
 
         cout << "Image succesfully loaded" << endl;
@@ -45,7 +47,8 @@ void Images_av::OpenImage(string mode, string option)
         }
     } else if (mode == "size") {
         int new_width = std::stoi(option);
-        Img new_image = Img(max(1, min(new_width, loaded_image.width())), loaded_image.height());
+        Img new_image = Img(max(1, min(new_width, loaded_image_extended.width())),
+                            loaded_image_extended.height());
         tighten_image_width(new_image);
         display(new_image);
     }
@@ -94,10 +97,10 @@ void Images_av::ComputeAllVerticalSeams()
         delete[] x_path;
     }
 
-    //    ComputeVerticalSeamsToAdd();
+    ComputeVerticalSeamsToAdd();
 
     // Make displayable version
-    ConvertIndImgTOImg(vert_seams, vert_seams_heat_colored, "heat");
+    ConvertIndImgTOImg(vertseams_extended, vertseams_extended_heat_colored, "heat");
 }
 
 void Images_av::FindVerticalSeam(int *x_path, Indimg &mapping_indices)
@@ -151,9 +154,8 @@ void Images_av::ComputeVerticalSeamsToAdd()
                 loaded_image_extended(i, y) = loaded_image(i / 2, y);
             } else {
                 vertseams_extended(i, y) = -vert_seams((i - 1) / 2, y);
-                loaded_image_extended(i, y) = (loaded_image((i - 1) / 2, y)
-                                               + loaded_image((i + 1) / 2, y))
-                                              / 2;
+                loaded_image_extended(i, y) = loaded_image((i - 1) / 2, y) / 2
+                                              + loaded_image((i + 1) / 2, y) / 2;
             }
         }
     }
@@ -274,11 +276,11 @@ void Images_av::ConvertBWtoHEAT(Img &input_bw, Img &output_heat)
 void Images_av::tighten_image_width(Img &output)
 {
     int delta = (loaded_image.width() - output.width());
-    for (int y = 0; y < loaded_image.height(); ++y) {
+    for (int y = 0; y < loaded_image_extended.height(); ++y) {
         int added_pix_in_row = 0;
-        for (int x = 0; x < loaded_image.width(); ++x) {
-            if (vert_seams(x, y) >= delta) {
-                output(added_pix_in_row, y) = loaded_image(x, y);
+        for (int x = 0; x < loaded_image_extended.width(); ++x) {
+            if (vertseams_extended(x, y) >= delta) {
+                output(added_pix_in_row, y) = loaded_image_extended(x, y);
                 added_pix_in_row++;
             }
             if (added_pix_in_row >= output.width() - 1) {
