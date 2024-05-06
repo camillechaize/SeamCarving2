@@ -1,11 +1,28 @@
-#ifndef GRAPHICSWINDOW_H
-#define GRAPHICSWINDOW_H
+#pragma once
+#include "utils.h"
+#include <functional>
 
-
-class graphicsWindow
+struct button
 {
-public:
-    graphicsWindow();
+    IntPoint2 screenPosition;
+    IntPoint2 scale;
+    std::function<void()> onClickAction;
 };
 
-#endif // GRAPHICSWINDOW_H
+struct buttonsList
+{
+    int lastFreeIndex = 0;
+    button listButtons[30];
+};
+
+buttonsList onScreenButtons;
+
+void addButton(button buttonToAdd);
+
+void detectClick(IntPoint2 clickScreenPosition);
+
+bool checkButtonClick(IntPoint2 clickScreenPosition);
+
+// BUTTONS
+
+void test();

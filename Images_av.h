@@ -43,5 +43,6 @@ public:
 private:
     void tighten_image_width(Img &output);
     void ENERG_Gradient();
+    void ENERG_Entropy();
     void fillMapping(Indimg mappingIndices, string mode);
 };

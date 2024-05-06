@@ -1,21 +1,19 @@
 #include "Images_av.h"
+#include "graphicswindow.h"
 #include <Imagine/Graphics.h>
 #include <Imagine/Images.h>
 #include <iostream>
 
 int window_w = 1200, window_h = 700;
 
-Img Image_energy(Img I)
-{
-    return I;
-}
-
 int main()
 {
+    button buttonTest{IntPoint2(0, 0), IntPoint2(200, 200), test};
+    addButton(buttonTest);
     Images_av SC_image;
     openWindow(window_w, window_h);
     SC_image.LoadImage("img5.jpg");
-    SC_image.ComputeEnergy();
+    SC_image.ComputeEnergy("entropy");
     SC_image.ComputeAllVerticalSeams();
     SC_image.OpenImage("seams");
     milliSleep(2000);

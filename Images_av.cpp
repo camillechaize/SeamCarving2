@@ -58,6 +58,8 @@ void Images_av::ComputeEnergy(string energy_function)
 {
     if (energy_function == "gradient") {
         ENERG_Gradient();
+    } else if (energy_function == "entropy") {
+        ENERG_Entropy();
     }
 }
 
@@ -332,6 +334,119 @@ void Images_av::ENERG_Gradient()
         }
     }
 
+    ConvertIndImgTOImg(energy, energy_colored);
+}
+
+void Images_av::ENERG_Entropy()
+{
+    cout << "Computing Energy: Entropy" << endl;
+    // determination of histogram to determine probability
+    int histogramr[256]; // each color have its own histogram
+    int histogramb[256];
+    int histogramg[256];
+    int const N = loaded_image.width() * loaded_image.height();
+
+    for (int y = 0; y < loaded_image.height(); ++y) {
+        for (int x = 0; x < loaded_image.width(); ++x) {
+            histogramr[loaded_image(x, y).r()] += 1;
+            histogramb[loaded_image(x, y).b()] += 1;
+            histogramg[loaded_image(x, y).g()] += 1;
+        }
+    }
+    // determination of probability
+    double pr[256];
+    double pb[256];
+    double pg[256];
+    for (int i = 0; i < 256; i++) {
+        pr[i] = histogramr[i] / N;
+        pb[i] = histogramb[i] / N;
+        pg[i] = histogramg[i] / N;
+    }
+
+    double probar;
+    double probab;
+    double probag;
+    // calcul de l'entropy de Shannon pour chaque pixel de coordonnées (x,y)
+    for (int y = 0; y < loaded_image.height(); ++y) {
+        for (int x = 0; x < loaded_image.width(); ++x) {
+            // Shannon Entropy
+            // on prend les pixels autour pour detemriner l'entropie de chaque pixel (on pourrait essayer de determiner le nombre de pixel ideal a prendre)
+            double Er = 0;
+            double Eb = 0;
+            double Eg = 0;
+            double Etot = 0;
+            probar = loaded_image(x, y).r();
+            probab = loaded_image(x, y).b();
+            probag = loaded_image(x, y).g();
+            if (probar > 0) {
+                Er -= probab * log2(probab);
+            }
+            if (probab > 0) {
+                Eb -= probab * log2(probab);
+            }
+            if (probag > 0) {
+                Eg -= probag * log2(probag);
+            }
+            if (x > 0) {
+                probar = loaded_image(x - 1, y).r();
+                probab = loaded_image(x - 1, y).b();
+                probag = loaded_image(x - 1, y).g();
+                if (probar > 0) {
+                    Er -= probab * log2(probab);
+                }
+                if (probab > 0) {
+                    Eb -= probab * log2(probab);
+                }
+                if (probag > 0) {
+                    Eg -= probag * log2(probag);
+                }
+            }
+            if (x < loaded_image.width() - 1) {
+                probar = loaded_image(x + 1, y).r();
+                probab = loaded_image(x + 1, y).b();
+                probag = loaded_image(x + 1, y).g();
+                if (probar > 0) {
+                    Er -= probab * log2(probab);
+                }
+                if (probab > 0) {
+                    Eb -= probab * log2(probab);
+                }
+                if (probag > 0) {
+                    Eg -= probag * log2(probag);
+                }
+            }
+            if (y > 0) {
+                probar = loaded_image(x, y - 1).r();
+                probab = loaded_image(x, y - 1).b();
+                probag = loaded_image(x, y - 1).g();
+                if (probar > 0) {
+                    Er -= probab * log2(probab);
+                }
+                if (probab > 0) {
+                    Eb -= probab * log2(probab);
+                }
+                if (probag > 0) {
+                    Eg -= probag * log2(probag);
+                }
+            }
+            if (y < loaded_image.height() - 1) {
+                probar = loaded_image(x, y + 1).r();
+                probab = loaded_image(x, y + 1).b();
+                probag = loaded_image(x, y + 1).g();
+                if (probar > 0) {
+                    Er -= probab * log2(probab);
+                }
+                if (probab > 0) {
+                    Eb -= probab * log2(probab);
+                }
+                if (probag > 0) {
+                    Eg -= probag * log2(probag);
+                }
+            }
+            Etot = Er + Eb + Eg;
+            energy(x, y) = Etot;
+        }
+    }
     ConvertIndImgTOImg(energy, energy_colored);
 }
 
