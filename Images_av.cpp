@@ -102,6 +102,7 @@ void Images_av::ComputeAllVerticalSeams()
     ComputeVerticalSeamsToAdd();
 
     // Make displayable version
+    ConvertIndImgTOImg(vert_seams, vert_seams_heat_colored, "heat");
     ConvertIndImgTOImg(vertseams_extended, vertseams_extended_heat_colored, "heat");
 }
 

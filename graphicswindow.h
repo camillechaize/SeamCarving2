@@ -4,8 +4,8 @@
 
 struct button
 {
-    IntPoint2 screenPosition;
-    IntPoint2 scale;
+    IntPoint2 screenPosition = IntPoint2(0, 0);
+    IntPoint2 scale = IntPoint2(0, 0);
     std::function<void()> onClickAction;
 };
 
@@ -15,9 +15,15 @@ struct buttonsList
     button listButtons[30];
 };
 
-buttonsList onScreenButtons;
+void initWindow();
+
+void updateWindow();
+
+void drawButtons();
 
 void addButton(button buttonToAdd);
+
+void clearButtons();
 
 void detectClick(IntPoint2 clickScreenPosition);
 
