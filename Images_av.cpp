@@ -8,6 +8,15 @@ Images_av::Images_av()
     cout << "Creating Advanced Image" << endl;
 }
 
+int Images_av::height(){
+    return loaded_image.height();
+}
+
+int Images_av::width(){
+    return loaded_image.width();
+}
+
+
 void Images_av::LoadImage(string path)
 {
     if (!load(loaded_image, stringSrcPath(path))) // Stop if image can't load
@@ -354,3 +363,16 @@ void Images_av::fillMapping(Indimg mappingIndices, string mode)
 }
 
 //            for (int i = std::max(0, index - k); i <= std::min(max_len - 1, index + k); ++i) {}
+
+void Images_av::Chooseparttoremove(Color* rgb,int width, int height){
+    for(int i=0;i<width;i++){
+        for (int j=0;j<height;j++){
+            if (rgb[i+width*j] == BLACK){
+                energy(i,j) = 0;
+            }
+        }
+    }
+}
+void Images_av::Chooseparttokeep(Color* rgb,int width, int height){
+
+}

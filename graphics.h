@@ -10,5 +10,7 @@ using namespace std;
 
 int keyboard();
 
-void get_coeffs(double coeffs[2]);
+void get_parts(Window hidden_window, Window actual_window, int width, int height, Color* rgb);
+
+void interface(int width, int height, int list_of_choices[]);
 

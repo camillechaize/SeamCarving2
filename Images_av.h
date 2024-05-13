@@ -3,6 +3,7 @@
 
 typedef Image<Color> Img;
 typedef Image<int> Indimg;
+typedef Image<byte> Im;
 
 class Images_av
 {
@@ -28,6 +29,9 @@ public:
     void LoadImage(string path);
     void OpenImage(string mode, string option = "none");
 
+    int height();
+    int width();
+
     void ComputeEnergy(string energy_function = "gradient");
 
     void ComputeAllVerticalSeams();
@@ -39,6 +43,9 @@ public:
 
     void ConvertIndImgTOImg(Indimg &input, Img &output, string method = "bw");
     void ConvertBWtoHEAT(Img &input_bw, Img &output_heat);
+
+    void Chooseparttoremove(Color* rgb,int width,int height);
+    void Chooseparttokeep(Color *rgb, int width, int height);
 
 private:
     void tighten_image_width(Img &output);

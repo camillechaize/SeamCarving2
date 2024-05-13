@@ -1,4 +1,5 @@
 #include "Images_av.h"
+#include "graphics.h"
 #include <Imagine/Graphics.h>
 #include <Imagine/Images.h>
 #include <iostream>
@@ -13,12 +14,24 @@ Img Image_energy(Img I)
 int main()
 {
     Images_av SC_image;
-    openWindow(window_w, window_h);
     SC_image.LoadImage("img5.jpg");
+    const int width = SC_image.width(),height = SC_image.height();
+    Window Hidden_window = openWindow(width, height);
+    Window Actual_window = openWindow(2*width + 1100, 2*height + 200);
+    setActiveWindow(Actual_window);
     SC_image.ComputeEnergy();
+    SC_image.OpenImage("energy","bw");
+    milliSleep(5000);
+    clearWindow();
+    SC_image.OpenImage("original");
+    Color* rgb = new Color[width*height];
+    get_parts(Hidden_window,Actual_window,width,height,rgb);
+    SC_image.Chooseparttoremove(rgb,width,height);
+    clearWindow();
+    SC_image.OpenImage("energy","bw");
+    milliSleep(5000);
     SC_image.ComputeAllVerticalSeams();
-    SC_image.OpenImage("seams");
-    milliSleep(2000);
+    cout << rgb[0] << endl;
     for (int i = 0; i < 7200; ++i) {
         noRefreshBegin();
         clearWindow();
