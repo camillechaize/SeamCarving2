@@ -1,5 +1,6 @@
 #pragma once
 #include "utils.h"
+#include <climits>
 
 typedef Image<Color> Img;
 typedef Image<int> Indimg;
@@ -11,6 +12,7 @@ class Images_av
 
     int k = 1;        // Max horizontal gap between each pixel of a vertical seam
     Img loaded_image; // Original Image loaded by user
+    Img brush_layer;  // Brush image to supress/keep parts of the image
 
     Indimg energy;      // Energy of each pixel of the original image
     Img energy_colored; // Displayable version of Energy
@@ -25,10 +27,11 @@ class Images_av
 
 public:
     Images_av();
-    void LoadImage(string path);
+    void LoadImage(string path, string option = "none");
     void OpenImage(string mode, string option = "none");
 
     void ComputeEnergy(string energy_function = "gradient");
+    void ApplyBrushEnergy();
 
     void ComputeAllVerticalSeams();
     void FindVerticalSeam(int *x_path, Indimg &mapping_indices);

@@ -8,25 +8,34 @@ Images_av::Images_av()
     cout << "Creating Advanced Image" << endl;
 }
 
-void Images_av::LoadImage(string path)
+void Images_av::LoadImage(string path, string option)
 {
-    if (!load(loaded_image, stringSrcPath(path))) // Stop if image can't load
-        cout << "Image couldn't be loaded" << endl;
-    else {
-        // Create energy Image
-        energy = Indimg(loaded_image.width(), loaded_image.height());
-        energy_colored = Img(loaded_image.width(), loaded_image.height());
-        energy_heat_colored = Img(loaded_image.width(), loaded_image.height());
-        vert_seams = Indimg(loaded_image.width(), loaded_image.height());
-        vert_seams_heat_colored = Img(loaded_image.width(), loaded_image.height());
+    if (option == "layer") {
+        if (!load(brush_layer, stringSrcPath(path))) // Stop if image can't load
+            cout << "Image couldn't be loaded" << endl;
+        else if (brush_layer.width() != loaded_image.width()
+                 || brush_layer.height() != loaded_image.height()) {
+            cout << "Brush image not the same size as original image !" << endl;
+        }
+    } else {
+        if (!load(loaded_image, stringSrcPath(path))) // Stop if image can't load
+            cout << "Image couldn't be loaded" << endl;
+        else {
+            // Create energy Image
+            energy = Indimg(loaded_image.width(), loaded_image.height());
+            energy_colored = Img(loaded_image.width(), loaded_image.height());
+            energy_heat_colored = Img(loaded_image.width(), loaded_image.height());
+            vert_seams = Indimg(loaded_image.width(), loaded_image.height());
+            vert_seams_heat_colored = Img(loaded_image.width(), loaded_image.height());
 
-        // Create an extended version of seams index and image
-        vertseams_extended = Indimg(vert_seams.width() * 2, vert_seams.height());
-        vertseams_extended_heat_colored = Img(vert_seams_heat_colored.width() * 2,
-                                              vert_seams_heat_colored.height());
-        loaded_image_extended = Img(loaded_image.width() * 2, loaded_image.height());
+            // Create an extended version of seams index and image
+            vertseams_extended = Indimg(vert_seams.width() * 2, vert_seams.height());
+            vertseams_extended_heat_colored = Img(vert_seams_heat_colored.width() * 2,
+                                                  vert_seams_heat_colored.height());
+            loaded_image_extended = Img(loaded_image.width() * 2, loaded_image.height());
 
-        cout << "Image succesfully loaded" << endl;
+            cout << "Image succesfully loaded" << endl;
+        }
     }
 }
 
@@ -37,8 +46,10 @@ void Images_av::OpenImage(string mode, string option)
     } else if (mode == "energy") {
         if (option == "bw")
             display(energy_colored);
-        else if (option == "heat")
+        else if (option == "heat") {
+            ConvertBWtoHEAT(energy_colored, energy_heat_colored);
             display(energy_heat_colored);
+        }
     } else if (mode == "seams") {
         if (option == "extended") {
             display(vertseams_extended_heat_colored);
@@ -60,6 +71,22 @@ void Images_av::ComputeEnergy(string energy_function)
         ENERG_Gradient();
     } else if (energy_function == "entropy") {
         ENERG_Entropy();
+    }
+
+    ConvertIndImgTOImg(energy, energy_colored);
+}
+
+void Images_av::ApplyBrushEnergy()
+{
+    for (int y = 0; y < energy.height(); ++y) {
+        for (int x = 0; x < energy.width(); ++x) {
+            if (brush_layer(x, y) == GREEN) {
+                energy(x, y) = (1 << 20);
+            }
+            if (brush_layer(x, y) == RED) {
+                energy(x, y) = -(1 << 20);
+            }
+        }
     }
 }
 
@@ -238,19 +265,21 @@ void Images_av::DisplaySeamTopImage(int *x_path)
 void Images_av::ConvertIndImgTOImg(Indimg &input, Img &output, string method)
 {
     if (method == "bw") {
-        // Find maximum in img
-        int max_value = 0;
+        // Find minimum/maximum in img
+        int min_value = 0, max_value = 0;
         for (int y = 0; y < input.height(); ++y) {
             for (int x = 0; x < input.width(); ++x) {
                 if (input(x, y) > max_value)
                     max_value = input(x, y);
+                if (input(x, y) < min_value)
+                    min_value = input(x, y);
             }
         }
 
         // Convert to ouput
         for (int y = 0; y < input.height(); ++y) {
             for (int x = 0; x < input.width(); ++x) {
-                int value = input(x, y) * 255.f / max_value;
+                int value = input(x, y) * 255.f / (max_value - min_value);
                 output(x, y).r() = value;
                 output(x, y).g() = value;
                 output(x, y).b() = value;
@@ -334,8 +363,6 @@ void Images_av::ENERG_Gradient()
                            / (3 * pix_in_grad);
         }
     }
-
-    ConvertIndImgTOImg(energy, energy_colored);
 }
 
 void Images_av::ENERG_Entropy()
@@ -448,7 +475,6 @@ void Images_av::ENERG_Entropy()
             energy(x, y) = Etot;
         }
     }
-    ConvertIndImgTOImg(energy, energy_colored);
 }
 
 void Images_av::fillMapping(Indimg mappingIndices, string mode)
