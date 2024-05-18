@@ -25,27 +25,36 @@ class Images_av
     Img vertseams_extended_heat_colored; // Displayable version of vertseams_extended
     Img loaded_image_extended;
 
+    Img displayedImg; // Diplayed image -> in case users wants to save it
+
 public:
     Images_av();
+
+    IntPoint2 size();
     void LoadImage(string path, string option = "none");
     void OpenImage(string mode, string option = "none");
 
     void ComputeEnergy(string energy_function = "gradient");
+
+    void ClearBrushEnergy();
+    void ColorBrushEnergy(IntPoint2 position, int scale = 5, Color col = GREEN);
     void ApplyBrushEnergy();
 
     void ComputeAllVerticalSeams();
     void FindVerticalSeam(int *x_path, Indimg &mapping_indices);
     void ComputeVerticalSeamsToAdd();
 
-    // void ComputeVerticalSeams();
     void DisplaySeamTopImage(int *x_path);
 
     void ConvertIndImgTOImg(Indimg &input, Img &output, string method = "bw");
     void ConvertBWtoHEAT(Img &input_bw, Img &output_heat);
 
+    void SaveImage();
+
 private:
     void tighten_image_width(Img &output);
     void ENERG_Gradient();
     void ENERG_Entropy();
+    void ENERG_Gradient2();
     void fillMapping(Indimg mappingIndices, string mode);
 };

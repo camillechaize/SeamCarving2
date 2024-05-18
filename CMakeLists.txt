@@ -9,10 +9,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(SeamCarving main.cpp
     Images_av.h Images_av.cpp
-    Energie.h Energie.cpp
+
     Seam.h Seam.cpp
     utils.h utils.cpp
-    graphicswindow.h graphicswindow.cpp)
+    graphicswindow.h graphicswindow.cpp
+)
 
 target_link_libraries(SeamCarving Imagine::Images)
 

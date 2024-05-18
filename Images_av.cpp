@@ -8,6 +8,11 @@ Images_av::Images_av()
     cout << "Creating Advanced Image" << endl;
 }
 
+IntPoint2 Images_av::size()
+{
+    return IntPoint2{loaded_image.width(), loaded_image.height()};
+}
+
 void Images_av::LoadImage(string path, string option)
 {
     if (option == "layer") {
@@ -27,7 +32,7 @@ void Images_av::LoadImage(string path, string option)
             energy_heat_colored = Img(loaded_image.width(), loaded_image.height());
             vert_seams = Indimg(loaded_image.width(), loaded_image.height());
             vert_seams_heat_colored = Img(loaded_image.width(), loaded_image.height());
-
+            brush_layer = Img(loaded_image.width(), loaded_image.height());
             // Create an extended version of seams index and image
             vertseams_extended = Indimg(vert_seams.width() * 2, vert_seams.height());
             vertseams_extended_heat_colored = Img(vert_seams_heat_colored.width() * 2,
@@ -42,27 +47,29 @@ void Images_av::LoadImage(string path, string option)
 void Images_av::OpenImage(string mode, string option)
 {
     if (mode == "original") {
-        display(loaded_image);
+        displayedImg = loaded_image;
     } else if (mode == "energy") {
-        if (option == "bw")
-            display(energy_colored);
-        else if (option == "heat") {
+        if (option == "bw") {
+            ConvertIndImgTOImg(energy, energy_colored);
+            displayedImg = energy_colored;
+        } else if (option == "heat") {
             ConvertBWtoHEAT(energy_colored, energy_heat_colored);
-            display(energy_heat_colored);
+            displayedImg = energy_heat_colored;
         }
     } else if (mode == "seams") {
         if (option == "extended") {
-            display(vertseams_extended_heat_colored);
+            displayedImg = vertseams_extended_heat_colored;
         } else {
-            display(vert_seams_heat_colored);
+            displayedImg = vert_seams_heat_colored;
         }
     } else if (mode == "size") {
         int new_width = std::stoi(option);
         Img new_image = Img(max(1, min(new_width, loaded_image_extended.width())),
                             loaded_image_extended.height());
         tighten_image_width(new_image);
-        display(new_image);
+        displayedImg = new_image;
     }
+    display(displayedImg);
 }
 
 void Images_av::ComputeEnergy(string energy_function)
@@ -71,9 +78,34 @@ void Images_av::ComputeEnergy(string energy_function)
         ENERG_Gradient();
     } else if (energy_function == "entropy") {
         ENERG_Entropy();
+    } else if (energy_function == "gradient2") {
+        ENERG_Gradient2();
     }
 
     ConvertIndImgTOImg(energy, energy_colored);
+}
+
+void Images_av::ClearBrushEnergy()
+{
+    for (int x = 0; x < brush_layer.width(); ++x) {
+        for (int y = 0; y < brush_layer.height(); ++y) {
+            brush_layer(x, y) = WHITE;
+        }
+    }
+}
+
+void Images_av::ColorBrushEnergy(IntPoint2 position, int scale, Color col)
+{
+    for (int x = max(0, position.x() - scale); x < min(position.x() + scale, brush_layer.width());
+         ++x) {
+        for (int y = max(0, position.y() - scale);
+             y < min(position.y() + scale, brush_layer.height());
+             ++y) {
+            if ((position.x() - x) * (position.x() - x) + (position.y() - y) * (position.y() - y)
+                < scale * scale)
+                brush_layer(x, y) = col;
+        }
+    }
 }
 
 void Images_av::ApplyBrushEnergy()
@@ -305,6 +337,11 @@ void Images_av::ConvertBWtoHEAT(Img &input_bw, Img &output_heat)
     }
 }
 
+void Images_av::SaveImage()
+{
+    save(displayedImg, "export.png");
+}
+
 void Images_av::tighten_image_width(Img &output)
 {
     int delta = (loaded_image.width() - output.width());
@@ -361,6 +398,48 @@ void Images_av::ENERG_Gradient()
             energy(x, y) = (std::abs(red_h) + std::abs(green_h) + std::abs(blue_h) + std::abs(red_v)
                             + std::abs(green_v) + std::abs(blue_v))
                            / (3 * pix_in_grad);
+        }
+    }
+}
+
+void Images_av::ENERG_Gradient2()
+{
+    cout << "Computing Energy: Gradient L2" << endl;
+    for (int y = 0; y < loaded_image.height(); ++y) {
+        for (int x = 0; x < loaded_image.width(); ++x) {
+            // sum each difference with adjacent pixel
+            int red_h, red_v = 0;
+            int green_h, green_v = 0;
+            int blue_h, blue_v = 0;
+            int pix_in_grad = 0;
+            if (x > 0) {
+                pix_in_grad++;
+                red_h += loaded_image(x - 1, y).r() - loaded_image(x, y).r();
+                green_h += loaded_image(x - 1, y).g() - loaded_image(x, y).g();
+                blue_h += loaded_image(x - 1, y).b() - loaded_image(x, y).b();
+            }
+            if (x < loaded_image.width() - 1) {
+                pix_in_grad++;
+                red_h += loaded_image(x + 1, y).r() - loaded_image(x, y).r();
+                green_h += loaded_image(x + 1, y).g() - loaded_image(x, y).g();
+                blue_h += loaded_image(x + 1, y).b() - loaded_image(x, y).b();
+            }
+            if (y > 0) {
+                pix_in_grad++;
+                red_v += loaded_image(x, y - 1).r() - loaded_image(x, y).r();
+                green_v += loaded_image(x, y - 1).g() - loaded_image(x, y).g();
+                blue_v += loaded_image(x, y - 1).b() - loaded_image(x, y).b();
+            }
+            if (y < loaded_image.height() - 1) {
+                pix_in_grad++;
+                red_v += loaded_image(x, y + 1).r() - loaded_image(x, y).r();
+                green_v += loaded_image(x, y + 1).g() - loaded_image(x, y).g();
+                blue_v += loaded_image(x, y + 1).b() - loaded_image(x, y).b();
+            }
+            energy(x, y) = std::sqrt(
+                (std::pow((std::abs(red_h) + std::abs(green_h) + std::abs(blue_h)), 2)
+                 + std::pow(std::abs(red_v) + std::abs(green_v) + std::abs(blue_v), 2))
+                / std::pow((3 * pix_in_grad), 2));
         }
     }
 }
