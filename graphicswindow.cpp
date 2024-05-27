@@ -3,7 +3,7 @@
 int window_w = 1200, window_h = 900;
 buttonsList onScreenButtons;
 
-string fileName;
+string fileName_g;
 Images_av working_image;
 string state
     = "init"; // init / NI: no image loaded / IL: Image loaded / +E: energy computed / +S: seams computed / R: resize image by mouse
@@ -97,7 +97,7 @@ void initWindow(string fileName)
 {
     openWindow(window_w, window_h);
 
-    fileName = fileName;
+    fileName_g = fileName;
 
     state = "NI";
     bool flag = true;
@@ -236,8 +236,7 @@ void updateWindow(bool &flag)
 // BUTTON FUNCTIONS
 void LoadImageButton()
 {
-    string fileName = "img5.jpg";
-    working_image.LoadImage(fileName);
+    working_image.LoadImage(fileName_g);
     working_image.OpenImage("original");
 
     state = "IL";
