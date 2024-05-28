@@ -19,7 +19,7 @@ int main()
     Window Hidden_window = openWindow(width, height);
     Window Actual_window = openWindow(2*width + 1100, 2*height + 200);
     setActiveWindow(Actual_window);
-    SC_image.ComputeEnergy();
+    SC_image.ComputeEnergy("gradient");
     SC_image.OpenImage("energy","bw");
     milliSleep(5000);
     clearWindow();
@@ -27,11 +27,12 @@ int main()
     Color* rgb = new Color[width*height];
     get_parts(Hidden_window,Actual_window,width,height,rgb);
     SC_image.Chooseparttoremove(rgb,width,height);
+    SC_image.Chooseparttokeep(rgb,width,height);
     clearWindow();
+    cout << BLACK << endl;
     SC_image.OpenImage("energy","bw");
     milliSleep(5000);
     SC_image.ComputeAllVerticalSeams();
-    cout << rgb[0] << endl;
     for (int i = 0; i < 7200; ++i) {
         noRefreshBegin();
         clearWindow();

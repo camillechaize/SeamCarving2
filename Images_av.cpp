@@ -44,8 +44,10 @@ void Images_av::OpenImage(string mode, string option)
     if (mode == "original") {
         display(loaded_image);
     } else if (mode == "energy") {
-        if (option == "bw")
+        if (option == "bw"){
+            ConvertIndImgTOImg(energy, energy_colored);
             display(energy_colored);
+        }
         else if (option == "heat")
             display(energy_heat_colored);
     } else if (mode == "seams") {
@@ -483,12 +485,21 @@ void Images_av::fillMapping(Indimg mappingIndices, string mode)
 void Images_av::Chooseparttoremove(Color* rgb,int width, int height){
     for(int i=0;i<width;i++){
         for (int j=0;j<height;j++){
-            if (rgb[i+width*j] == BLACK){
-                energy(i,j) = 0;
+            if (rgb[i+width*j] == GREEN){
+                energy(i,j) = -pow(2,20);
             }
         }
     }
 }
-void Images_av::Chooseparttokeep(Color* rgb,int width, int height){
 
+void Images_av::Chooseparttokeep(Color* rgb,int width, int height){
+    for(int i=0;i<width;i++){
+        for (int j=0;j<height;j++){
+            if (rgb[i+width*j] == RED){
+                cout << 2 << endl;
+                energy(i,j) = pow(2,20);
+            }
+        }
+    }
 }
+

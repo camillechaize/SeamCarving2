@@ -10,7 +10,7 @@ int keyboard() {
     return 0;
 }
 
-void get_parts(Window hidden_window, Window actual_window, int width, int height, Color* rgb){
+void get_parts(Window hidden_window, Window actual_window, int width, int height, Color* &rgb){
     int* list_of_points_x = new int[1000];
     int* list_of_points_y = new int[1000];
     int idx = 0;
@@ -23,7 +23,7 @@ void get_parts(Window hidden_window, Window actual_window, int width, int height
             col = RED;
         }
         else {
-            col = BLACK;
+            col = GREEN;
         }
         while(true){
             getEvent(-1,get_mouse);
