@@ -10,13 +10,11 @@ int keyboard() {
     return 0;
 }
 
-void get_parts(Window hidden_window, Window actual_window, int width, int height, Color* &rgb){
+void get_parts(int width, int height, Color* &rgb){
     int* list_of_points_x = new int[1000];
     int* list_of_points_y = new int[1000];
     int idx = 0;
-    setActiveWindow(actual_window);
     Event get_mouse;
-    while(true){
         idx = 0;
         Color col;
         if (anyClick()== 1){
@@ -39,18 +37,10 @@ void get_parts(Window hidden_window, Window actual_window, int width, int height
                 break;
             }
         }
-        setActiveWindow(hidden_window);
+        clearWindow();
         fillPoly(list_of_points_x,list_of_points_y,idx,col);
-        setActiveWindow(actual_window);
-        milliSleep(1000);
-        if (keyboard() == KEY_SHIFT ){
-            break;
-        }
-    }
-    setActiveWindow(hidden_window);
-    captureWindow(rgb,width,height);
+    captureRectangle(0,0,rgb,width,height);
     clearWindow();
-    setActiveWindow(actual_window);
 }
 
 void interface(int width, int height ,int list_of_choices[]){
